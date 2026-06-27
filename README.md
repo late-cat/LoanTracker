@@ -2,7 +2,8 @@
 
 A decentralized loan repayment tracker built on the Stellar network using Soroban smart contracts. This project is a complete **"Orange Belt" Level 3 production-ready application**.
 
-**🟢 Live Demo:** [https://loan-tracker-beige.vercel.app/](https://loan-tracker-beige.vercel.app/)
+**🟢 Live Demo:** [https://loan-tracker-beige.vercel.app/](https://loan-tracker-beige.vercel.app/)  
+**🎥 Video Demo:** [https://youtu.be/GHsujBDpFLA](https://youtu.be/GHsujBDpFLA)
 
 ## 📖 The Problem & The Solution
 
