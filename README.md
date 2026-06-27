@@ -108,10 +108,11 @@ sequenceDiagram
 ### 1. Fully Mobile Responsive UI
 > *The entire application is completely mobile responsive, ensuring borrowers can manage their loans and view their credit scores from any device seamlessly.*
 
-![Mobile Responsive](demo-img/mobile-responsive.png)
+![Mobile Responsive Hero](demo-img/mobile-responsive-hero.png)
+![Mobile Responsive Dashboard](demo-img/mobile-responsive-dashboard.png)
 
 ### 2. Landing & Connecting
-![Dashboard Preview](demo-img/hero.png)
+![Dashboard Preview](demo-img/hero-n.png)
 
 ### 3. User Dashboard
 ![Connecting & Dashboard](demo-img/dashboard-empty.png)
