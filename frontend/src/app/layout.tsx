@@ -39,8 +39,9 @@ export default function RootLayout({
         <div className="relative z-10 flex flex-col min-h-screen">
           <Navbar />
           <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-8">
-          {children}
-        </main>
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
