@@ -52,6 +52,24 @@ A decentralized loan repayment tracker built on the Stellar network using Soroba
 
 ## 🏗 Architecture & Tech Stack
 
+### Repository Structure
+```text
+loan-tracker/
+├── contracts/                  # Soroban Smart Contracts (Rust)
+│   ├── credit-rating/          # Contract 1: Manages user credit scores & RBAC
+│   ├── loan-protocol/          # Contract 2: Core borrowing & lending logic
+├── frontend/                   # Next.js 15 Web Application
+│   ├── src/
+│   │   ├── app/                # Pages & API Routes (Dashboard, Activity)
+│   │   ├── components/         # Reusable UI (shadcn/ui & Tailwind)
+│   │   ├── lib/                # Soroban RPC data layer & Blockchain config
+│   │   └── store/              # Zustand global state (Wallet connectivity)
+│   └── __tests__/              # Vitest & React Testing Library frontend tests
+├── scripts/                    # Bash deployment scripts
+├── demo-img/                   # UI screenshots and visual assets
+└── .github/workflows/          # CI/CD pipelines for automated testing
+```
+
 ### Tools & Links Used
 - **Frontend Framework:** [Next.js 15 (React 19)](https://nextjs.org/)
 - **Styling:** [Tailwind CSS v4](https://tailwindcss.com/) & [shadcn/ui](https://ui.shadcn.com/)
