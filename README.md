@@ -58,6 +58,20 @@ sequenceDiagram
 
 ## 🚀 Deployment Instructions
 
+### Vercel Deployment (Frontend)
+Since the Next.js application is located in the `frontend` subdirectory, follow these specific steps to deploy to Vercel:
+
+1. Create a new project on [Vercel](https://vercel.com/new).
+2. Import this GitHub repository.
+3. **CRITICAL:** In the "Configure Project" screen, open the **"Root Directory"** setting.
+4. Click **Edit** and select `frontend`.
+5. Open the **"Environment Variables"** section and add the following from your local `.env.local`:
+   - `NEXT_PUBLIC_CREDIT_RATING_ADDRESS`
+   - `NEXT_PUBLIC_LOAN_PROTOCOL_ADDRESS`
+   - `TREASURY_SECRET_KEY`
+   - `TREASURY_PUBLIC_KEY`
+6. Click **Deploy**. Vercel will automatically run `npm run build` using the Next.js preset.
+
 ### Local Development
 1. Clone the repository and install dependencies:
    ```bash
@@ -77,9 +91,9 @@ Follow the step-by-step instructions below to deploy the contracts to the Stella
    stellar network add testnet --rpc-url https://soroban-testnet.stellar.org --network-passphrase "Test SDF Network ; September 2015"
    stellar keys generate --global PROJECT_TESTNET
    ```
-2. **Fund your testnet account** using Friendbot:
+2. **Fund your testnet account** using the built-in Friendbot command:
    ```bash
-   # Go to https://friendbot.stellar.org/?addr=<YOUR_ADDRESS>
+   stellar keys fund --network testnet PROJECT_TESTNET
    ```
 3. **Build the contracts:**
    ```bash
@@ -98,7 +112,10 @@ Follow the step-by-step instructions below to deploy the contracts to the Stella
    *Save the output Contract ID.*
 6. **Initialize the contracts:**
    ```bash
+   # Initialize Credit Rating with the Loan Protocol as its admin (so it can update scores)
    stellar contract invoke --id <CR_ID> --source PROJECT_TESTNET --network testnet -- initialize --admin <LP_ID>
+   
+   # Initialize Loan Protocol with your address as admin and link the Credit Rating contract
    stellar contract invoke --id <LP_ID> --source PROJECT_TESTNET --network testnet -- initialize --admin <YOUR_ADDRESS> --credit_rating <CR_ID>
    ```
 
