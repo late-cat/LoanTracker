@@ -90,10 +90,10 @@ export default function Dashboard() {
       const tx = TransactionBuilder.fromXDR(signedTxXdr, TESTNET_NETWORK_PASSPHRASE);
       const response = await server.sendTransaction(tx as any);
       
-      if (response.status === "PENDING" || response.status === "SUCCESS") {
+      if (response.status === "PENDING") {
          
          // Wait for the transaction to be fully confirmed on the blockchain
-         let txStatus = response.status;
+         let txStatus: string = response.status;
          if (txStatus === "PENDING") {
              let retries = 0;
              while ((txStatus === "PENDING" || txStatus === "NOT_FOUND") && retries < 15) {
@@ -187,8 +187,8 @@ export default function Dashboard() {
       const tx = TransactionBuilder.fromXDR(signedTxXdr, TESTNET_NETWORK_PASSPHRASE);
       const response = await server.sendTransaction(tx as any);
       
-      if (response.status === "PENDING" || response.status === "SUCCESS") {
-         let txStatus = response.status;
+      if (response.status === "PENDING") {
+         let txStatus: string = response.status;
          if (txStatus === "PENDING") {
              let retries = 0;
              while ((txStatus === "PENDING" || txStatus === "NOT_FOUND") && retries < 15) {

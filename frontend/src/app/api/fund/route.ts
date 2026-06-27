@@ -50,7 +50,7 @@ export async function POST(req: Request) {
         // Submit to the network
         const response = await server.sendTransaction(preparedTx as any);
 
-        if (response.status === "PENDING" || response.status === "SUCCESS") {
+        if (response.status === "PENDING") {
           return NextResponse.json({ success: true, hash: response.hash });
         } else {
           throw new Error(`Transaction failed: ${JSON.stringify(response)}`);
