@@ -173,6 +173,28 @@ Follow the step-by-step instructions below to deploy the contracts to the Stella
 ## 🤖 Continuous Integration (CI/CD)
 This project is configured with a robust GitHub Actions workflow that automatically runs comprehensive tests for both the Smart Contracts (Cargo) and the Frontend (Vitest) on every push and pull request.
 
+### ✅ Test Output (3+ Passing Tests)
+
+**Smart Contract Tests (Cargo):**
+```text
+running 2 tests
+test test::test_credit_rating ... ok
+test test::test_loan_lifecycle ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+```
+
+**Frontend Tests (Vitest & RTL):**
+```text
+ RUN  v4.1.9 /loan-tracker/frontend
+
+ ✓ __tests__/dashboard.test.tsx (1 test) 46ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Duration  913ms
+```
+
 ![CI/CD Pipeline](demo-img/CI_CD.png)
 
 ---
