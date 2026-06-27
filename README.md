@@ -1,8 +1,21 @@
 # Stellar Loan Repayment Tracker 🚀
 
-A decentralized loan repayment tracker built on the Stellar network using Soroban smart contracts. This project is a complete "Orange Belt" Level 3 production-ready application.
+A decentralized loan repayment tracker built on the Stellar network using Soroban smart contracts. This project is a complete **"Orange Belt" Level 3 production-ready application**.
 
 **🟢 Live Demo:** [https://loan-tracker-beige.vercel.app/](https://loan-tracker-beige.vercel.app/)
+
+## 📖 The Problem & The Solution
+
+**The Problem:** Traditional credit systems are opaque, centralized, and exclude billions of unbanked individuals globally. Furthermore, existing decentralized lending protocols often overcollateralize loans without building a persistent, composable identity or "credit score" for the user. 
+
+**The Solution:** This application solves this by introducing an **On-Chain Credit Rating**. By splitting the architecture into two communicating smart contracts, users can request unsecured or undercollateralized loans from a Treasury. When users repay their loans on time, their on-chain credit score dynamically increases. If they default, they are heavily penalized. This transparent, composable reputation system can be plugged into any other protocol in the Stellar ecosystem.
+
+### Key Engineering Challenges Overcome:
+- **Inter-Contract Communication:** We successfully decoupled state by separating `credit-rating` from the `loan-protocol`. Navigating cross-contract invocations required robust Role-Based Access Control (RBAC) so that only the Loan Protocol can modify a user's score on the Credit Rating contract.
+- **Fast-Refresh React & Network Rate Limits:** We discovered that fetching full Horizon ledger state inside React mapping loops quickly hit API rate limits. We solved this by writing a highly optimized `soroban.ts` data layer that fetches sequence numbers once, loops gracefully, and caches responses.
+- **Real-time Event Streaming:** Instead of relying on mock data, we implemented a live polling mechanism against the Soroban RPC `getEvents` endpoint, dynamically fetching and parsing XDR topics to render a live activity feed.
+
+---
 
 ## 📸 Application Flow
 
@@ -19,17 +32,36 @@ A decentralized loan repayment tracker built on the Stellar network using Soroba
 
 ### 4. Transaction History
 ![Transaction History](demo-img/transaction-history.png)
-## 🌟 Product Overview
-The Loan Repayment Tracker allows users to borrow and lend securely on the Stellar network. It utilizes an on-chain credit score system that dynamically updates based on a user's borrowing history. Repaying on time naturally increases your score, while defaulting heavily penalizes it. It features a fully dynamic Next.js frontend with optimistic UI updates, integrated Freighter wallet support, and resilient state-fetching from the Soroban Testnet.
 
-## 🏗 Architecture
+---
 
-### Smart Contracts
-We use a two-contract architecture to demonstrate real inter-contract communication and separation of concerns.
+## 🏆 Orange Belt Requirements Mapping
 
-1. **`credit-rating`**: Manages user credit scores. Enforces Role-Based Access Control (RBAC) so only authorized protocols (like the loan protocol) can modify scores.
-2. **`loan-protocol`**: Handles the core loan lifecycle (requests, funding, repayment, liquidation). Integrates with the `token::Client` to handle real asset transfers (e.g., XLM or USDC). It calls the `credit-rating` contract to enforce borrowing limits and update scores.
+| Requirement | Implementation |
+|-------------|----------------|
+| **Advanced Soroban Smart Contracts** | Implemented custom persistent storage for Loan states, RBAC for admin controls, and native `i32` data validation for credit score clamping (300-850). |
+| **Inter-contract communication** | The `loan-protocol` contract actively makes cross-contract calls to the `credit-rating` contract to fetch and update scores. |
+| **Real-time events** | `activity/page.tsx` polls the Soroban RPC for live `loan_requested` and `score_updated` events, decoding XDR on the fly for the UI. |
+| **Production transaction UI** | Fully optimistic UI in the dashboard. Handles simulating, submitting, and polling the RPC until the ledger confirms the transaction block. |
+| **StellarWalletsKit integration** | Implemented persistent multi-wallet (Freighter) connectivity using a global Zustand store. |
+| **Feature-based architecture** | Strictly separated components, pages, `wallet.ts` state, and `soroban.ts` data-fetching layers. |
+| **Testing Suite** | Cargo tests for rust contracts, Vitest + React Testing Library for frontend components (with fully mocked Soroban API). |
+| **CI/CD with GitHub Actions** | Strict workflow in `.github/workflows/ci.yml` deploying Node 20 environments to run tests on every push. |
 
+---
+
+## 🏗 Architecture & Tech Stack
+
+### Tools & Links Used
+- **Frontend Framework:** [Next.js 15 (React 19)](https://nextjs.org/)
+- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/) & [shadcn/ui](https://ui.shadcn.com/)
+- **State Management:** [Zustand](https://zustand-demo.pmnd.rs/)
+- **Wallet Connection:** [StellarWalletsKit](https://github.com/Creit-Tech/Stellar-Wallets-Kit)
+- **Blockchain SDK:** [Stellar SDK (JavaScript)](https://stellar.github.io/js-stellar-sdk/)
+- **Smart Contracts:** [Rust](https://www.rust-lang.org/) & [Soroban SDK](https://soroban.stellar.org/docs)
+- **Testing:** [Vitest](https://vitest.dev/)
+
+### Smart Contract Flow
 ```mermaid
 sequenceDiagram
     participant Borrower
@@ -50,18 +82,7 @@ sequenceDiagram
     LoanProtocol-->>Borrower: Loan Repaid
 ```
 
-## 🛠 Features & Tech Stack
-- **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS v4, shadcn/ui.
-- **Aesthetics**: Premium, clean dashboard interface.
-- **State Management**: Zustand with persistent storage middleware.
-- **Wallet**: StellarWalletsKit (Multi-wallet support, Freighter, automatic network syncing).
-- **Smart Contracts**: Rust & Soroban SDK.
-- **Testing**: Vitest + React Testing Library for frontend, Cargo tests for contracts.
-
-## 🤖 Continuous Integration (CI/CD)
-This project is configured with a robust GitHub Actions workflow that automatically runs comprehensive tests for both the Smart Contracts (Cargo) and the Frontend (Vitest) on every push and pull request.
-
-![CI/CD Pipeline](demo-img/ci-cd.png)
+---
 
 ## 🚀 Deployment Instructions
 
@@ -77,13 +98,13 @@ Since the Next.js application is located in the `frontend` subdirectory, follow 
    - `NEXT_PUBLIC_LOAN_PROTOCOL_ADDRESS`
    - `TREASURY_SECRET_KEY`
    - `TREASURY_PUBLIC_KEY`
-6. Click **Deploy**. Vercel will automatically run `npm run build` using the Next.js preset.
+6. Click **Deploy**. Vercel will automatically run `npm run build`.
 
 ### Local Development
 1. Clone the repository and install dependencies:
    ```bash
    cd frontend
-   npm install
+   npm ci --legacy-peer-deps
    ```
 2. Start the development server:
    ```bash
@@ -126,14 +147,14 @@ Follow the step-by-step instructions below to deploy the contracts to the Stella
    stellar contract invoke --id <LP_ID> --source PROJECT_TESTNET --network testnet -- initialize --admin <YOUR_ADDRESS> --credit_rating <CR_ID>
    ```
 
-*(Alternatively, you can run `sh scripts/deploy.sh` after funding your account).*
+---
 
-### 🔗 Current Testnet Deployments
+## 🔗 Current Testnet Deployments
 
 These contracts are actively deployed on the Soroban Testnet and bound to the frontend application:
 
-- **Credit Rating Contract Address:** `CC2BYHU4KSZS3MX6NDVBFESS2SOY7N263534Y27HXH4XYVHCORZ63Q3A`
-- **Loan Protocol Contract Address:** `CDNRA6JAGTZZMJQWI3D3S6GWAUWRJCEZ2DX3UOYKXSRKMI4WXO2SJGKD`
+- **Credit Rating Contract:** `CC2BYHU4KSZS3MX6NDVBFESS2SOY7N263534Y27HXH4XYVHCORZ63Q3A`
+- **Loan Protocol Contract:** `CDNRA6JAGTZZMJQWI3D3S6GWAUWRJCEZ2DX3UOYKXSRKMI4WXO2SJGKD`
 - **Treasury Backend Public Key:** `GCNCVI63G6OXMBT26A72FVC7U4BHZ4QPLL75TOUUD5DGSR7IL33Y6IXW`
 
 ## 🔒 Security Practices
