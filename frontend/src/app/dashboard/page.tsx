@@ -4,7 +4,7 @@ import { useWalletStore } from "@/store/wallet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, BadgeDollarSign, CreditCard, TrendingUp, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { fetchCreditScore, fetchAllLoans, buildRequestLoanTx, buildRepayLoanTx, getRpcServer, TESTNET_NETWORK_PASSPHRASE, fetchWalletBalance, CONTRACT_ADDRESS_LOAN_PROTOCOL } from "@/lib/soroban";
+import { fetchCreditScore, fetchUserLoans, buildRequestLoanTx, buildRepayLoanTx, getRpcServer, TESTNET_NETWORK_PASSPHRASE, fetchWalletBalance, CONTRACT_ADDRESS_LOAN_PROTOCOL } from "@/lib/soroban";
 import { rpc, TransactionBuilder } from "@stellar/stellar-sdk";
 import {
   Dialog,
@@ -54,7 +54,7 @@ export default function Dashboard() {
       setIsInitializing(true);
       fetchWalletBalance(address).then(bal => setWalletBalance(bal));
       fetchCreditScore(address).then(score => setCreditScore(score));
-      fetchAllLoans(address).then(loans => {
+      fetchUserLoans(address).then(loans => {
           const userLoans = loans.filter(l => l.borrower === address);
           setMyLoans(userLoans);
           setActiveLoans(userLoans.filter(l => !l.isRepaid).length);
@@ -108,7 +108,7 @@ export default function Dashboard() {
              throw new Error("Transaction failed to confirm on the blockchain.");
          }
 
-         const freshLoans = await fetchAllLoans(address);
+         const freshLoans = await fetchUserLoans(address);
          const userFreshLoans = freshLoans.filter(l => l.borrower === address);
          const newLoan = userFreshLoans.sort((a, b) => b.id - a.id)[0];
          

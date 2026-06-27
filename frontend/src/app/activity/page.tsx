@@ -49,17 +49,25 @@ export default function ActivityFeed() {
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
                   <Bell className="text-orange-600 w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 capitalize truncate">
-                    {event.type.replace(/_/g, ' ')}
+                <div className="flex-1 min-w-0 pr-2">
+                  <div className="flex justify-between items-start">
+                    <p className="text-sm font-medium text-gray-900 capitalize truncate">
+                      {event.type.replace(/_/g, ' ')}
+                    </p>
+                    
+                    {event.amount && (
+                      <p className={`text-sm font-semibold shrink-0 ml-2 ${event.type === 'loan_funded' ? 'text-green-600' : 'text-gray-900'}`}>
+                        {event.type === 'loan_funded' ? '+' : ''}{event.amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} XLM
+                      </p>
+                    )}
+                  </div>
+                  <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5 sm:mt-1 truncate">
+                    {event.loanId ? `Loan #${event.loanId}` : JSON.stringify(event.data)}
                   </p>
-                  <p className="text-[11px] sm:text-xs text-gray-600 mt-0.5 sm:mt-1 truncate">
-                    {JSON.stringify(event.data)}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-1 sm:mt-2 text-[10px] sm:text-xs text-gray-500">
-                    <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded">Ledger: {event.ledger}</span>
-                    <span className="hidden sm:inline">•</span>
-                    <span>{event.time}</span>
+                  <div className="flex flex-wrap items-center gap-1 sm:gap-2 mt-1 sm:mt-2 text-[10px] sm:text-xs text-gray-400">
+                    <span className="font-mono bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">Ledger: {event.ledger}</span>
+                    <span className="hidden sm:inline text-gray-300">•</span>
+                    <span>{new Date(event.time).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
                   </div>
                 </div>
               </CardContent>

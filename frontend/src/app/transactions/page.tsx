@@ -164,21 +164,34 @@ export default function Transactions() {
                         {getIconForType(tx.type)}
                       </div>
                       
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold text-gray-900 capitalize text-sm sm:text-base truncate">{tx.type.replace(/_/g, ' ')}</p>
-                          <div className="hidden sm:flex shrink-0 text-[10px] sm:text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full items-center gap-1">
-                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                            Confirmed
+                      <div className="min-w-0 flex-1 flex justify-between items-center pr-2">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-gray-900 capitalize text-sm sm:text-base truncate">{tx.type.replace(/_/g, ' ')}</p>
+                            <div className="hidden sm:flex shrink-0 text-[10px] sm:text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full items-center gap-1">
+                              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                              Confirmed
+                            </div>
+                          </div>
+                          <div className="text-[11px] sm:text-xs text-gray-500 flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 mt-1">
+                            <span className="shrink-0 font-medium text-gray-600">
+                               {new Date(tx.time).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                            <span className="hidden sm:inline text-gray-300">•</span>
+                            <span className="text-gray-400 font-mono truncate">
+                              Ledger {tx.ledger}
+                            </span>
                           </div>
                         </div>
-                        <div className="text-[11px] sm:text-xs text-gray-500 flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 mt-1">
-                          <span className="shrink-0 font-medium text-gray-600">{tx.time}</span>
-                          <span className="hidden sm:inline text-gray-300">•</span>
-                          <span className="text-gray-400 font-mono truncate">
-                            Ledger {tx.ledger}
-                          </span>
-                        </div>
+                        
+                        {/* Transaction Amount - Banking Style */}
+                        {tx.amount && (
+                          <div className="text-right">
+                             <p className={`font-semibold text-sm sm:text-base ${tx.type === 'loan_funded' ? 'text-green-600' : tx.type === 'loan_repaid' ? 'text-gray-900' : 'text-gray-900'}`}>
+                                {tx.type === 'loan_funded' ? '+' : ''}{tx.amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} XLM
+                             </p>
+                          </div>
+                        )}
                       </div>
                     </div>
                     

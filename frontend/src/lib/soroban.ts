@@ -121,7 +121,73 @@ export const buildFundLoanTx = async (userAddress: string, loanId: number): Prom
     const preparedTx = await server.prepareTransaction(tx);
     return preparedTx.toXDR();
 };
-export const fetchAllLoans = async (userAddress: string) => {
+export const fetchAllLoans = async () => {
+    const server = getRpcServer();
+    try {
+        const contract = new Contract(CONTRACT_ADDRESS_LOAN_PROTOCOL);
+        
+        let txBuilderParams: any = {
+            fee: "100",
+            networkPassphrase: TESTNET_NETWORK_PASSPHRASE,
+            timebounds: { minTime: 0, maxTime: 0 }
+        };
+
+        const account = new Account("GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF", "0");
+        const countTx = await server.prepareTransaction(
+            new TransactionBuilder(account, txBuilderParams)
+            .addOperation(contract.call("get_loan_count"))
+            .setTimeout(30)
+            .build()
+        );
+        const countRes = await server.simulateTransaction(countTx);
+        if (!rpc.Api.isSimulationSuccess(countRes) || !countRes.result?.retval) return [];
+
+        const totalLoans = Number(scValToNative(countRes.result.retval));
+        const allLoans = [];
+
+        const chunkSize = 5;
+        for (let i = 1; i <= totalLoans; i += chunkSize) {
+            const chunk = [];
+            for (let j = i; j < i + chunkSize && j <= totalLoans; j++) {
+                chunk.push(j);
+            }
+            
+            const chunkPromises = chunk.map(async (loanId) => {
+                try {
+                    const tx = await server.prepareTransaction(
+                        new TransactionBuilder(account, txBuilderParams)
+                        .addOperation(contract.call("get_loan", nativeToScVal(BigInt(loanId), { type: "u64" })))
+                        .setTimeout(30)
+                        .build()
+                    );
+                    const response = await server.simulateTransaction(tx);
+                    if (rpc.Api.isSimulationSuccess(response) && response.result?.retval) {
+                        const loanData = scValToNative(response.result.retval);
+                        const amount = Number(loanData.principal) / 10000000;
+                        return {
+                            id: loanId,
+                            amount
+                        };
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch loan", loanId, e);
+                }
+                return null;
+            });
+            
+            const results = await Promise.all(chunkPromises);
+            for (const res of results) {
+                if (res) allLoans.push(res);
+            }
+        }
+        return allLoans;
+    } catch (e) {
+        console.error("Failed to fetch all loans", e);
+        return [];
+    }
+};
+
+export const fetchUserLoans = async (userAddress: string) => {
     const server = getRpcServer();
     const contract = new Contract(CONTRACT_ADDRESS_LOAN_PROTOCOL);
     const loans: any[] = [];
@@ -201,7 +267,8 @@ export const fetchContractEvents = async () => {
     const server = getRpcServer();
     try {
         const latestLedger = await server.getLatestLedger();
-        const startLedger = Math.max(1, latestLedger.sequence - 17280); // Roughly last 24 hours of ledgers
+        // Fetch events from roughly the last hour to prevent RPC timeouts
+        const startLedger = Math.max(1, latestLedger.sequence - 1000);
 
         const events = await server.getEvents({
             startLedger,
@@ -214,14 +281,27 @@ export const fetchContractEvents = async () => {
             limit: 50
         });
 
-        return events.events.map(e => ({
-            id: e.id,
-            type: e.topic[0] ? scValToNative(e.topic[0]) : "unknown",
-            data: e.value ? scValToNative(e.value) : null,
-            ledger: e.ledger,
-            contractId: e.contractId,
-            time: new Date().toLocaleString() // Rough estimation for now
-        }));
+        // Fetch all loans to map amounts
+        const allLoans = await fetchAllLoans();
+        const loanMap = new Map(allLoans.map(l => [Number(l.id), l.amount]));
+
+        return events.events.map(e => {
+            const type = e.topic[0] ? scValToNative(e.topic[0]) : "unknown";
+            const loanId = e.topic[1] ? Number(scValToNative(e.topic[1])) : null;
+            const amount = loanId ? loanMap.get(loanId) : null;
+            
+            return {
+                id: e.id,
+                type,
+                loanId,
+                amount,
+                data: e.value ? scValToNative(e.value) : null,
+                ledger: e.ledger,
+                txHash: e.txHash,
+                contractId: e.contractId,
+                time: e.ledgerClosedAt ? new Date(e.ledgerClosedAt).toLocaleString() : new Date().toLocaleString()
+            };
+        });
     } catch (e) {
         console.warn("Failed to fetch events:", e);
         return [];
