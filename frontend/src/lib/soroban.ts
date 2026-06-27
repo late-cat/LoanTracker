@@ -299,7 +299,7 @@ export const fetchContractEvents = async () => {
                 ledger: e.ledger,
                 txHash: e.txHash,
                 contractId: e.contractId,
-                time: e.ledgerClosedAt ? new Date(e.ledgerClosedAt).toLocaleString() : new Date().toLocaleString()
+                time: e.ledgerClosedAt ? e.ledgerClosedAt : new Date().toISOString()
             };
         });
     } catch (e) {

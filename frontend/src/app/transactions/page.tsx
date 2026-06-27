@@ -70,7 +70,6 @@ export default function Transactions() {
       <div className="mb-6 sm:mb-8 border-b border-gray-200 pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">Transaction Explorer</h1>
-          <p className="text-gray-500 mt-2 text-sm sm:text-base">Advanced on-chain ledger analysis and filtering.</p>
         </div>
         
         {/* Mobile Filter Toggle Button */}
