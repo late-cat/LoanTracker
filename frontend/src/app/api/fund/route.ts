@@ -29,7 +29,6 @@ export async function POST(req: Request) {
       try {
         const account = await server.getAccount(treasuryAddress);
 
-        // Create operation: fund_loan(loan_id: u64, lender: Address)
         const txBuilder = new TransactionBuilder(account, { fee: "1000", networkPassphrase: TESTNET_NETWORK_PASSPHRASE });
 
         txBuilder.addOperation(contract.call(
@@ -39,15 +38,12 @@ export async function POST(req: Request) {
         ));
 
         txBuilder.setTimeout(30);
-        let tx = txBuilder.build();
+        const tx = txBuilder.build();
 
-        // Prepare for Soroban simulation and fee bumping
-        let preparedTx = await server.prepareTransaction(tx);
+        const preparedTx = await server.prepareTransaction(tx);
         
-        // Sign the transaction with the Treasury's private key
         preparedTx.sign(treasuryKeypair);
 
-        // Submit to the network
         const response = await server.sendTransaction(preparedTx as any);
 
         if (response.status === "PENDING") {

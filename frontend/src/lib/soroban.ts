@@ -4,9 +4,8 @@ import { WalletNetwork } from '@creit.tech/stellar-wallets-kit';
 export const TESTNET_RPC_URL = 'https://soroban-testnet.stellar.org';
 export const TESTNET_NETWORK_PASSPHRASE = 'Test SDF Network ; September 2015';
 
-// These should be replaced with real addresses after deployment
-export const CONTRACT_ADDRESS_CREDIT_RATING = process.env.NEXT_PUBLIC_CREDIT_RATING_ADDRESS || "";
-export const CONTRACT_ADDRESS_LOAN_PROTOCOL = process.env.NEXT_PUBLIC_LOAN_PROTOCOL_ADDRESS || "CCYV4BQQ4C34WMMB53Z4Z3XWJ2QZ42W5QOQJ6QY7Y7Y7Y7Y7Y7Y7Y7Y7";
+export const CONTRACT_ADDRESS_CREDIT_RATING = process.env.NEXT_PUBLIC_CREDIT_RATING_ADDRESS || "CDJ25NHZOKCCMCJHCDD7O7FG7NQKFICHEJL3NUSP7O5ENZYPZYC4IDCO";
+export const CONTRACT_ADDRESS_LOAN_PROTOCOL = process.env.NEXT_PUBLIC_LOAN_PROTOCOL_ADDRESS || "CBQAH35CKA64FZFLCVVO35FZYJVWBJD5FXWJNULTQDUNGKQM6RWK6CLA";
 
 export const getRpcServer = () => {
     return new rpc.Server(TESTNET_RPC_URL);
@@ -31,9 +30,7 @@ export const fetchCreditScore = async (userAddress: string): Promise<number> => 
         const server = getRpcServer();
         const contract = new Contract(CONTRACT_ADDRESS_CREDIT_RATING);
         
-        // Build the simulation request
         const tx = await server.prepareTransaction(
-            // We use a dummy source account just for simulation
             new TransactionBuilder(
                 new Account(userAddress, "0"),
                 { fee: "100", networkPassphrase: TESTNET_NETWORK_PASSPHRASE }
@@ -43,7 +40,6 @@ export const fetchCreditScore = async (userAddress: string): Promise<number> => 
             .build()
         );
 
-        // Simulate
         const response = await server.simulateTransaction(tx);
         
         if (rpc.Api.isSimulationSuccess(response) && response.result?.retval) {
@@ -61,15 +57,12 @@ export const buildRequestLoanTx = async (userAddress: string, amount: number, in
     
     const account = await server.getAccount(userAddress);
     
-    // Native XLM token contract on Testnet
     const XLM_TESTNET_ADDRESS = "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC";
 
-    // Convert XLM to stroops (1 XLM = 10,000,000 stroops)
     const principalStroops = BigInt(amount) * BigInt(10000000);
     const interestStroops = BigInt(Math.floor(interest)) * BigInt(10000000);
     const durationSeconds = BigInt(durationDays * 24 * 60 * 60);
 
-    // Create operation: request_loan(borrower: Address, token: Address, principal: i128, interest_amount: i128, duration: u64)
     const txBuilder = new TransactionBuilder(account, { fee: "100", networkPassphrase: TESTNET_NETWORK_PASSPHRASE });
     
     txBuilder.addOperation(contract.call(
@@ -131,70 +124,70 @@ export const buildFundLoanTx = async (userAddress: string, loanId: number): Prom
 export const fetchAllLoans = async (userAddress: string) => {
     const server = getRpcServer();
     const contract = new Contract(CONTRACT_ADDRESS_LOAN_PROTOCOL);
-    const loans = [];
+    const loans: any[] = [];
     
     try {
         const txBuilderParams = { fee: "100", networkPassphrase: TESTNET_NETWORK_PASSPHRASE };
         const account = new Account(userAddress, "0");
+
+        const countTx = await server.prepareTransaction(
+            new TransactionBuilder(account, txBuilderParams)
+            .addOperation(contract.call("get_loan_count"))
+            .setTimeout(30)
+            .build()
+        );
+        const countResponse = await server.simulateTransaction(countTx);
+        if (!rpc.Api.isSimulationSuccess(countResponse) || !countResponse.result?.retval) {
+            return [];
+        }
+        const totalLoans = Number(scValToNative(countResponse.result.retval));
         
-        // Fetch sequentially to prevent RPC rate limiting
-        for (let i = 1; i <= 100; i++) {
-            let retries = 3;
-            let success = false;
-            while (retries > 0 && !success) {
+        if (totalLoans === 0) return [];
+
+        const chunkSize = 5;
+        for (let i = 1; i <= totalLoans; i += chunkSize) {
+            const chunk = [];
+            for (let j = i; j < i + chunkSize && j <= totalLoans; j++) {
+                chunk.push(j);
+            }
+            
+            const chunkPromises = chunk.map(async (loanId) => {
                 try {
                     const tx = await server.prepareTransaction(
                         new TransactionBuilder(account, txBuilderParams)
-                        .addOperation(contract.call("get_loan", nativeToScVal(BigInt(i), { type: "u64" })))
+                        .addOperation(contract.call("get_loan", nativeToScVal(BigInt(loanId), { type: "u64" })))
                         .setTimeout(30)
                         .build()
                     );
-
                     const response = await server.simulateTransaction(tx);
                     if (rpc.Api.isSimulationSuccess(response) && response.result?.retval) {
                         const loanData = scValToNative(response.result.retval);
-                        
                         const amount = Number(loanData.principal) / 10000000;
                         const interest = Number(loanData.interest_amount) / 10000000;
-                        
                         let statusStr = "Requested";
-                        if (typeof loanData.status === 'string') {
-                            statusStr = loanData.status;
-                        } else if (Array.isArray(loanData.status) && loanData.status.length > 0) {
-                            statusStr = loanData.status[0];
-                        } else if (loanData.status && typeof loanData.status === 'object') {
-                            statusStr = Object.keys(loanData.status)[0] || "Requested";
-                        }
+                        if (typeof loanData.status === 'string') statusStr = loanData.status;
+                        else if (Array.isArray(loanData.status) && loanData.status.length > 0) statusStr = loanData.status[0];
+                        else if (loanData.status && typeof loanData.status === 'object') statusStr = Object.keys(loanData.status)[0] || "Requested";
                         
-                        loans.push({
-                            id: i,
+                        return {
+                            id: loanId,
                             amount,
                             interest,
                             hash: "on-chain", 
                             isFunded: statusStr === "Funded" || statusStr === "Repaid",
                             isRepaid: statusStr === "Repaid",
                             borrower: loanData.borrower
-                        });
-                        success = true;
-                    } else {
-                        // Simulation returned error -> Loan not found panic -> End of loans
-                        return loans;
+                        };
                     }
-                } catch (e: any) {
-                    const errorStr = e.message || String(e);
-                    // If the contract panics because the loan doesn't exist, it throws a HostError/InvalidAction
-                    if (errorStr.includes("InvalidAction") || errorStr.includes("UnreachableCodeReached") || errorStr.includes("HostError")) {
-                        return loans;
-                    }
-                    
-                    // Otherwise it's a Network or rate limit error
-                    retries--;
-                    if (retries === 0) {
-                        console.warn(`fetchAllLoans stopped at index ${i}. Reason:`, errorStr);
-                        return loans; // Give up and return what we have
-                    }
-                    await new Promise(r => setTimeout(r, 1000));
+                } catch (e) {
+                    console.warn(`Failed to fetch loan ${loanId}`, e);
                 }
+                return null;
+            });
+
+            const results = await Promise.all(chunkPromises);
+            for (const res of results) {
+                if (res) loans.push(res);
             }
         }
         return loans;

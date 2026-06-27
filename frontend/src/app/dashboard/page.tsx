@@ -45,8 +45,12 @@ export default function Dashboard() {
   const [myLoans, setMyLoans] = useState<any[]>([]);
   const [loanFilter, setLoanFilter] = useState<'ALL' | 'ACTIVE' | 'REPAID' | 'PENDING'>('ALL');
 
+  // Hydration fix
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   useEffect(() => {
-    if (address) {
+    if (address && mounted) {
       setIsInitializing(true);
       fetchWalletBalance(address).then(bal => setWalletBalance(bal));
       fetchCreditScore(address).then(score => setCreditScore(score));
@@ -62,7 +66,7 @@ export default function Dashboard() {
       setTotalBorrowed(0);
       setMyLoans([]);
     }
-  }, [address]);
+  }, [address, mounted]);
 
   const handleRequestLoan = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,23 +80,19 @@ export default function Dashboard() {
           return;
       }
 
-      // 1. Build the contract call XDR
       const xdr = await buildRequestLoanTx(address, amount, computedInterest, requestDuration);
       
-      // 2. Request signature from Freighter
       const { signedTxXdr } = await kit.signTransaction(xdr, { 
         networkPassphrase: TESTNET_NETWORK_PASSPHRASE,
         address
       });
       
-      // 3. Submit to Soroban RPC
       const server = getRpcServer();
       const tx = TransactionBuilder.fromXDR(signedTxXdr, TESTNET_NETWORK_PASSPHRASE);
       const response = await server.sendTransaction(tx as any);
       
       if (response.status === "PENDING") {
          
-         // Wait for the transaction to be fully confirmed on the blockchain
          let txStatus: string = response.status;
          if (txStatus === "PENDING") {
              let retries = 0;
@@ -108,53 +108,30 @@ export default function Dashboard() {
              throw new Error("Transaction failed to confirm on the blockchain.");
          }
 
-         // Fetch all loans again to get the exact newly created loan ID from the blockchain
          const freshLoans = await fetchAllLoans(address);
          const userFreshLoans = freshLoans.filter(l => l.borrower === address);
-         const newLoan = userFreshLoans.sort((a, b) => b.id - a.id)[0]; // get the highest ID
+         const newLoan = userFreshLoans.sort((a, b) => b.id - a.id)[0];
          
          if (!newLoan) throw new Error("Could not find newly created loan.");
 
-         // Inject the real transaction hash so the user can click it!
          newLoan.hash = response.hash;
 
-         // Optimistic UI Update for Request
          setActiveLoans(prev => prev + 1);
          setTotalBorrowed(prev => prev + amount);
          setMyLoans(prev => [...prev, newLoan]);
          setIsDialogOpen(false);
 
-         // 4. Trigger Automatic Backend Funding from the Platform Treasury
-         try {
-             const fundRes = await fetch('/api/fund', {
-                 method: 'POST',
-                 headers: { 'Content-Type': 'application/json' },
-                 body: JSON.stringify({ loanId: newLoan.id })
-             });
+         fetch('/api/fund', {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({ loanId: newLoan.id })
+         }).then(async fundRes => {
              if (fundRes.ok) {
                  const fundData = await fundRes.json();
                  setMyLoans(prev => prev.map(loan => loan.id === newLoan.id ? { ...loan, isFunded: true } : loan));
-                 alert(`Success! The Universal Platform Treasury has funded your loan.`);
-                 if (fundData.hash) {
-                     let fundTxStatus = "PENDING";
-                     let fundRetries = 0;
-                     while ((fundTxStatus === "PENDING" || fundTxStatus === "NOT_FOUND") && fundRetries < 15) {
-                         await new Promise(resolve => setTimeout(resolve, 2000));
-                         const getTxRes = await server.getTransaction(fundData.hash);
-                         fundTxStatus = getTxRes.status;
-                         fundRetries++;
-                     }
-                     if (fundTxStatus === "SUCCESS") {
-                         fetchWalletBalance(address).then(setWalletBalance);
-                     }
-                 }
-             } else {
-                 throw new Error("Treasury funding failed");
+                 fetchWalletBalance(address).then(setWalletBalance);
              }
-         } catch (fundErr) {
-             console.error("Funding error", fundErr);
-             alert("The loan was requested, but automatic funding failed. See console.");
-         }
+         }).catch(console.error);
 
       } else {
          console.error("Submission failed", response);
@@ -173,16 +150,13 @@ export default function Dashboard() {
     try {
       setIsRepaying(loanId);
       
-      // 1. Build the contract call XDR
       const xdr = await buildRepayLoanTx(address, loanId);
       
-      // 2. Request signature from Freighter
       const { signedTxXdr } = await kit.signTransaction(xdr, { 
         networkPassphrase: TESTNET_NETWORK_PASSPHRASE,
         address
       });
       
-      // 3. Submit to Soroban RPC
       const server = getRpcServer();
       const tx = TransactionBuilder.fromXDR(signedTxXdr, TESTNET_NETWORK_PASSPHRASE);
       const response = await server.sendTransaction(tx as any);
@@ -242,7 +216,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {address ? (creditScore !== null ? creditScore : "Loading...") : "---"}
+              {address ? (isInitializing && creditScore === null ? <Loader2 className="w-5 h-5 animate-spin text-gray-400 mt-1" /> : (creditScore !== null ? creditScore : "---")) : "---"}
             </div>
             <p className="text-xs text-muted-foreground">On-chain live data</p>
           </CardContent>
@@ -253,7 +227,9 @@ export default function Dashboard() {
             <CreditCard className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{address ? activeLoans : "0"}</div>
+            <div className="text-2xl font-bold">
+              {address ? (isInitializing && activeLoans === 0 ? <Loader2 className="w-5 h-5 animate-spin text-gray-400 mt-1" /> : activeLoans) : "0"}
+            </div>
             <p className="text-xs text-muted-foreground">Currently borrowing</p>
           </CardContent>
         </Card>
@@ -263,7 +239,9 @@ export default function Dashboard() {
             <BadgeDollarSign className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{address ? `${totalBorrowed.toLocaleString()} XLM` : "0 XLM"}</div>
+            <div className="text-2xl font-bold">
+              {address ? (isInitializing && totalBorrowed === 0 ? <Loader2 className="w-5 h-5 animate-spin text-gray-400 mt-1" /> : `${totalBorrowed.toLocaleString()} XLM`) : "0 XLM"}
+            </div>
             <p className="text-xs text-muted-foreground">Lifetime</p>
           </CardContent>
         </Card>
@@ -273,7 +251,9 @@ export default function Dashboard() {
             <TrendingUp className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{address ? `${walletBalance} XLM` : "0 XLM"}</div>
+            <div className="text-2xl font-bold">
+              {address ? (isInitializing && walletBalance === "0.00" ? <Loader2 className="w-5 h-5 animate-spin text-gray-400 mt-1" /> : `${walletBalance} XLM`) : "0 XLM"}
+            </div>
             <p className="text-xs text-muted-foreground">Available on Testnet</p>
           </CardContent>
         </Card>
@@ -351,29 +331,40 @@ export default function Dashboard() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mt-8">
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="bg-gray-50/50 text-gray-500 font-medium border-b border-gray-100">
+                <thead className="bg-gray-50/50 text-gray-500 font-medium border-b border-gray-100 whitespace-nowrap">
                   <tr>
-                    <th className="px-6 py-4">ID</th>
-                    <th className="px-6 py-4">Amount</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4">Transaction</th>
-                    <th className="px-6 py-4 text-right">Action</th>
+                    <th className="px-4 sm:px-6 py-4">ID</th>
+                    <th className="px-4 sm:px-6 py-4">Amount</th>
+                    <th className="px-4 sm:px-6 py-4">Status</th>
+                    <th className="px-4 sm:px-6 py-4">Transaction</th>
+                    <th className="px-4 sm:px-6 py-4 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {filteredAndSortedLoans.length === 0 ? (
+                  {isInitializing && filteredAndSortedLoans.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center text-gray-400">No active loans found.</td>
+                      <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                        <div className="flex flex-col items-center justify-center gap-3">
+                          <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+                          <span>Syncing with Soroban Testnet...</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : filteredAndSortedLoans.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-12 text-center text-gray-400">
+                        No active loans found.
+                      </td>
                     </tr>
                   ) : (
                     filteredAndSortedLoans.map((loan, idx) => (
                       <tr key={idx} className={`hover:bg-gray-50/50 transition-colors ${loan.isRepaid ? 'opacity-60' : ''}`}>
-                        <td className="px-6 py-4 font-medium text-gray-900">#{loan.id}</td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-6 py-4 font-medium text-gray-900 whitespace-nowrap">#{loan.id}</td>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                           <div className="font-bold text-gray-900">{loan.amount.toLocaleString()} XLM</div>
                           <div className="text-xs text-gray-500">+{loan.interest} XLM interest</div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                            {loan.isRepaid ? (
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 Repaid
@@ -388,7 +379,7 @@ export default function Dashboard() {
                               </span>
                            )}
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                            {loan.hash !== "on-chain" ? (
                                <a href={`https://stellar.expert/explorer/testnet/tx/${loan.hash}`} target="_blank" rel="noopener noreferrer" className="text-orange-600 hover:text-orange-800 hover:underline inline-flex items-center gap-1 font-medium">
                                  {loan.hash.substring(0,8)}... ↗
@@ -399,7 +390,7 @@ export default function Dashboard() {
                                </a>
                            )}
                         </td>
-                        <td className="px-6 py-4 text-right">
+                        <td className="px-4 sm:px-6 py-4 text-right whitespace-nowrap">
                            {!loan.isRepaid && loan.isFunded && (
                               <button 
                                 onClick={() => handleRepayLoan(loan.id)}

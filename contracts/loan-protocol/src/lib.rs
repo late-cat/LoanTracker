@@ -161,6 +161,10 @@ impl LoanProtocolContract {
     pub fn get_loan(env: Env, loan_id: u64) -> Loan {
         env.storage().persistent().get(&DataKey::Loan(loan_id)).expect("Loan not found")
     }
+
+    pub fn get_loan_count(env: Env) -> u64 {
+        env.storage().instance().get(&DataKey::LoanCounter).unwrap_or(0u64)
+    }
 }
 
 mod test;

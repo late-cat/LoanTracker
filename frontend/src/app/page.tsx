@@ -46,7 +46,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.6 }}
-          className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 text-gray-900 leading-tight"
+          className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-6 text-gray-900 leading-tight"
         >
           Decentralized Lending, <br className="hidden md:block" />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-600">
@@ -58,7 +58,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="text-gray-600 mb-10 max-w-2xl leading-relaxed text-lg"
+          className="text-gray-600 mb-10 max-w-2xl leading-relaxed text-base sm:text-lg px-2"
         >
           The Loan Repayment Tracker leverages on-chain credit histories to facilitate trustless, peer-to-peer borrowing. 
           Build your credit score by repaying on time and unlock better lending rates automatically.
@@ -68,7 +68,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.6 }}
-          className="flex flex-col sm:flex-row gap-6 justify-center items-center w-full"
+          className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-stretch sm:items-center w-full px-4 sm:px-0"
         >
           <Link
             href="/dashboard"
@@ -80,8 +80,8 @@ export default function Home() {
           </Link>
 
           <Link
-            href="/transactions"
-            className="px-8 py-4 text-gray-600 font-semibold text-lg hover:text-orange-600 transition-colors flex items-center gap-2 group"
+            href="/analytics"
+            className="px-8 py-4 bg-white sm:bg-transparent border border-gray-200 sm:border-none rounded-lg sm:rounded-none text-gray-600 font-semibold text-lg hover:text-orange-600 transition-colors flex items-center justify-center gap-2 group w-full sm:w-auto"
           >
             <LineChart size={20} className="group-hover:scale-110 transition-transform" />
             View Protocols

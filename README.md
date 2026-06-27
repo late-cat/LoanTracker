@@ -26,8 +26,8 @@ A decentralized loan repayment tracker built on the Stellar network using Soroba
 
 These contracts are actively deployed on the Soroban Testnet and bound to the frontend application:
 
-- **Credit Rating Contract:** `CC2BYHU4KSZS3MX6NDVBFESS2SOY7N263534Y27HXH4XYVHCORZ63Q3A`
-- **Loan Protocol Contract:** `CDNRA6JAGTZZMJQWI3D3S6GWAUWRJCEZ2DX3UOYKXSRKMI4WXO2SJGKD`
+- **Credit Rating Contract:** `CDJ25NHZOKCCMCJHCDD7O7FG7NQKFICHEJL3NUSP7O5ENZYPZYC4IDCO`
+- **Loan Protocol Contract:** `CBQAH35CKA64FZFLCVVO35FZYJVWBJD5FXWJNULTQDUNGKQM6RWK6CLA`
 - **Treasury Backend Public Key:** `GCNCVI63G6OXMBT26A72FVC7U4BHZ4QPLL75TOUUD5DGSR7IL33Y6IXW`
 
 ### Real Contract Interaction Hash

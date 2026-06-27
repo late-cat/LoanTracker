@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Geist } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { cn } from "@/lib/utils";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
@@ -38,9 +39,10 @@ export default function RootLayout({
         
         <div className="relative z-10 flex flex-col min-h-screen">
           <Navbar />
-          <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-8">
+          <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-8">
             {children}
           </main>
+          <Footer />
         </div>
       </body>
     </html>
