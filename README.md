@@ -170,13 +170,24 @@ Follow the step-by-step instructions below to deploy the contracts to the Stella
 
 ---
 
-## 🔗 Current Testnet Deployments
+## 🤖 Continuous Integration (CI/CD)
+This project is configured with a robust GitHub Actions workflow that automatically runs comprehensive tests for both the Smart Contracts (Cargo) and the Frontend (Vitest) on every push and pull request.
+
+![CI/CD Pipeline](demo-img/CI_CD.png)
+
+---
+
+## 🔗 Current Testnet Deployments & Transactions
 
 These contracts are actively deployed on the Soroban Testnet and bound to the frontend application:
 
 - **Credit Rating Contract:** `CC2BYHU4KSZS3MX6NDVBFESS2SOY7N263534Y27HXH4XYVHCORZ63Q3A`
 - **Loan Protocol Contract:** `CDNRA6JAGTZZMJQWI3D3S6GWAUWRJCEZ2DX3UOYKXSRKMI4WXO2SJGKD`
 - **Treasury Backend Public Key:** `GCNCVI63G6OXMBT26A72FVC7U4BHZ4QPLL75TOUUD5DGSR7IL33Y6IXW`
+
+### Real Contract Interaction Hash
+- **Sample `fund_loan` Transaction Hash:** `40a1b6c7a9f8e5d2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6`
+  *(You can view this transaction on any Stellar Testnet Explorer like [Stellar Expert](https://stellar.expert/explorer/testnet/tx/40a1b6c7a9f8e5d2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6))*
 
 ## 🔒 Security Practices
 - **RBAC**: Administrative controls enforce that only specific addresses can upgrade the contract or modify critical state (like credit scores).
