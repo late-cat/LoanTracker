@@ -183,6 +183,7 @@ test test::test_loan_lifecycle ... ok
 
 test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
 ```
+![Cargo Test Output](demo-img/test.png)
 
 **Frontend Tests (Vitest & RTL):**
 ```text
@@ -194,6 +195,7 @@ test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
       Tests  1 passed (1)
    Duration  913ms
 ```
+![Vitest Output](demo-img/vitest-run.png)
 
 ![CI/CD Pipeline](demo-img/CI_CD.png)
 
