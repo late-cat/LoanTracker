@@ -12,6 +12,7 @@ export default function Transactions() {
   // Flipkart-style advanced filters
   const [typeFilters, setTypeFilters] = useState<string[]>([]);
   const [timeFilter, setTimeFilter] = useState("all");
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -66,15 +67,27 @@ export default function Transactions() {
 
   return (
     <div className="max-w-7xl mx-auto mb-20 px-4 sm:px-6">
-      <div className="mb-8 border-b border-gray-200 pb-6">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">Transaction Explorer</h1>
-        <p className="text-gray-500 mt-2 text-sm sm:text-base">Advanced on-chain ledger analysis and filtering.</p>
+      <div className="mb-6 sm:mb-8 border-b border-gray-200 pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Transaction Explorer</h1>
+          <p className="text-gray-500 mt-2 text-sm sm:text-base">Advanced on-chain ledger analysis and filtering.</p>
+        </div>
+        
+        {/* Mobile Filter Toggle Button */}
+        <button 
+          onClick={() => setShowMobileFilters(!showMobileFilters)}
+          className="md:hidden flex items-center justify-center gap-2 w-full bg-white border border-gray-200 shadow-sm text-gray-700 py-2.5 rounded-lg font-medium text-sm"
+        >
+          <Filter size={16} />
+          {showMobileFilters ? "Hide Filters" : "Show Filters"}
+          {typeFilters.length > 0 && <span className="bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded text-xs ml-1">{typeFilters.length}</span>}
+        </button>
       </div>
       
       <div className="flex flex-col md:flex-row gap-8">
         
         {/* Sidebar Filters (Flipkart Style) */}
-        <div className="w-full md:w-64 shrink-0 space-y-6">
+        <div className={`w-full md:w-64 shrink-0 space-y-6 ${showMobileFilters ? 'block' : 'hidden md:block'}`}>
           <div>
             <div className="flex items-center gap-2 font-semibold text-gray-900 mb-4 uppercase text-xs tracking-wider">
                <Filter size={14} /> Filters
@@ -145,26 +158,32 @@ export default function Transactions() {
                    </div>
                 ) : (
                    filteredTxs.map((tx, i) => (
-                  <div key={tx.id || i} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 hover:bg-gray-50/80 transition-colors gap-4 group">
-                    <div className="flex items-start sm:items-center gap-4 w-full sm:w-auto overflow-hidden">
-                      <div className="mt-1 sm:mt-0 shrink-0 w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 shadow-sm flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <div key={tx.id || i} className="flex flex-row items-center justify-between p-4 hover:bg-gray-50/80 transition-colors gap-3 sm:gap-4 group">
+                    <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                      <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gray-50 border border-gray-100 shadow-sm flex items-center justify-center group-hover:scale-105 transition-transform">
                         {getIconForType(tx.type)}
                       </div>
                       
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-gray-900 capitalize text-sm sm:text-base">{tx.type.replace(/_/g, ' ')}</p>
-                        <div className="text-xs text-gray-500 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1.5">
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-gray-900 capitalize text-sm sm:text-base truncate">{tx.type.replace(/_/g, ' ')}</p>
+                          <div className="hidden sm:flex shrink-0 text-[10px] sm:text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full items-center gap-1">
+                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                            Confirmed
+                          </div>
+                        </div>
+                        <div className="text-[11px] sm:text-xs text-gray-500 flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 mt-1">
                           <span className="shrink-0 font-medium text-gray-600">{tx.time}</span>
                           <span className="hidden sm:inline text-gray-300">•</span>
-                          <span className="text-gray-400 font-mono truncate block bg-gray-100 px-2 py-0.5 rounded">
+                          <span className="text-gray-400 font-mono truncate">
                             Ledger {tx.ledger}
                           </span>
                         </div>
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-0 pt-4 sm:pt-0 mt-2 sm:mt-0 border-gray-100">
-                      <div className="shrink-0 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 shrink-0">
+                      <div className="sm:hidden flex shrink-0 text-[10px] font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full items-center gap-1">
                          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
                          Confirmed
                       </div>
@@ -174,9 +193,11 @@ export default function Transactions() {
                           href={`https://stellar.expert/explorer/testnet/tx/${tx.txHash}`} 
                           target="_blank" 
                           rel="noreferrer"
-                          className="flex items-center gap-1.5 text-xs font-medium text-orange-600 hover:text-orange-700 hover:bg-orange-50 px-3 py-1.5 rounded-lg transition-colors border border-transparent hover:border-orange-200"
+                          className="flex items-center justify-center w-8 h-8 sm:w-auto sm:h-auto sm:gap-1.5 text-orange-600 hover:text-orange-700 bg-orange-50 sm:bg-transparent hover:bg-orange-100 sm:hover:bg-orange-50 sm:px-3 sm:py-1.5 rounded-lg transition-colors border sm:border-transparent sm:hover:border-orange-200"
+                          title="View Details"
                         >
-                          View Details <ExternalLink size={14} />
+                          <span className="hidden sm:inline text-xs font-medium">View Details</span>
+                          <ExternalLink size={14} />
                         </a>
                       )}
                     </div>
