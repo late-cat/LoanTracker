@@ -1,4 +1,4 @@
-# Stellar Loan Repayment Tracker 🚀
+# Stellar Loan Repayment Tracker ✨♻️
 
 A decentralized loan repayment tracker built on the Stellar network using Soroban smart contracts. This project is a complete **"Orange Belt" Level 3 production-ready application**.
 
