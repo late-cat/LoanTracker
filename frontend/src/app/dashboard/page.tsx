@@ -280,21 +280,21 @@ export default function Dashboard() {
       </div>
 
       <div className="mt-4">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto">
             <h2 className="text-xl font-bold">Your Loans</h2>
             {address && (
-              <div className="flex bg-gray-100 p-1 rounded-lg text-sm">
-                <button onClick={() => setLoanFilter('ALL')} className={`px-3 py-1 rounded-md transition-colors ${loanFilter === 'ALL' ? 'bg-white shadow-sm font-medium text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>All</button>
-                <button onClick={() => setLoanFilter('ACTIVE')} className={`px-3 py-1 rounded-md transition-colors ${loanFilter === 'ACTIVE' ? 'bg-white shadow-sm font-medium text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>Active</button>
-                <button onClick={() => setLoanFilter('PENDING')} className={`px-3 py-1 rounded-md transition-colors ${loanFilter === 'PENDING' ? 'bg-white shadow-sm font-medium text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>Pending</button>
-                <button onClick={() => setLoanFilter('REPAID')} className={`px-3 py-1 rounded-md transition-colors ${loanFilter === 'REPAID' ? 'bg-white shadow-sm font-medium text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>Repaid</button>
+              <div className="flex flex-wrap bg-gray-100 p-1 rounded-lg text-sm w-full sm:w-auto">
+                <button onClick={() => setLoanFilter('ALL')} className={`px-3 py-1 rounded-md transition-colors flex-1 sm:flex-none text-center ${loanFilter === 'ALL' ? 'bg-white shadow-sm font-medium text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>All</button>
+                <button onClick={() => setLoanFilter('ACTIVE')} className={`px-3 py-1 rounded-md transition-colors flex-1 sm:flex-none text-center ${loanFilter === 'ACTIVE' ? 'bg-white shadow-sm font-medium text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>Active</button>
+                <button onClick={() => setLoanFilter('PENDING')} className={`px-3 py-1 rounded-md transition-colors flex-1 sm:flex-none text-center ${loanFilter === 'PENDING' ? 'bg-white shadow-sm font-medium text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>Pending</button>
+                <button onClick={() => setLoanFilter('REPAID')} className={`px-3 py-1 rounded-md transition-colors flex-1 sm:flex-none text-center ${loanFilter === 'REPAID' ? 'bg-white shadow-sm font-medium text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>Repaid</button>
               </div>
             )}
           </div>
           {address && (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2 transition-all active:scale-95">
+              <DialogTrigger className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md font-medium text-sm flex items-center justify-center gap-2 transition-all active:scale-95 w-full md:w-auto">
                   Request New Loan
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
