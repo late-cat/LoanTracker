@@ -2,8 +2,22 @@
 
 A decentralized loan repayment tracker built on the Stellar network using Soroban smart contracts. This project is a complete "Orange Belt" Level 3 production-ready application.
 
-![Dashboard Preview](demo-img/demo.png)
+## 📸 Application Flow
 
+### 1. Connecting & Dashboard
+![Dashboard Preview](demo-img/dashboard-empty.png)
+
+### 2. Requesting a Loan
+![Request Loan](demo-img/request-loan.png)
+
+### 3. Active Loan (Pending Treasury Funding)
+![Active Loan](demo-img/dashboard-active.png)
+
+### 4. Loan Funded by Treasury
+![Loan Funded](demo-img/loan-funded.png)
+
+### 5. Repaying the Loan & Credit Score Boost
+![Loan Repaid](demo-img/dashboard-repaid.png)
 ## 🌟 Product Overview
 The Loan Repayment Tracker allows users to borrow and lend securely on the Stellar network. It utilizes an on-chain credit score system that dynamically updates based on a user's borrowing history. Repaying on time naturally increases your score, while defaulting heavily penalizes it. It features a fully dynamic Next.js frontend with optimistic UI updates, integrated Freighter wallet support, and resilient state-fetching from the Soroban Testnet.
 
