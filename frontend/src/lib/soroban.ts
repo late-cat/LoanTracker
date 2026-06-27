@@ -203,3 +203,34 @@ export const fetchAllLoans = async (userAddress: string) => {
         return loans;
     }
 };
+
+export const fetchContractEvents = async () => {
+    const server = getRpcServer();
+    try {
+        const latestLedger = await server.getLatestLedger();
+        const startLedger = Math.max(1, latestLedger.sequence - 17280); // Roughly last 24 hours of ledgers
+
+        const events = await server.getEvents({
+            startLedger,
+            filters: [
+                {
+                    type: "contract",
+                    contractIds: [CONTRACT_ADDRESS_LOAN_PROTOCOL, CONTRACT_ADDRESS_CREDIT_RATING].filter(Boolean)
+                }
+            ],
+            limit: 50
+        });
+
+        return events.events.map(e => ({
+            id: e.id,
+            type: e.topic[0] ? scValToNative(e.topic[0]) : "unknown",
+            data: e.value ? scValToNative(e.value) : null,
+            ledger: e.ledger,
+            contractId: e.contractId,
+            time: new Date().toLocaleString() // Rough estimation for now
+        }));
+    } catch (e) {
+        console.warn("Failed to fetch events:", e);
+        return [];
+    }
+};
