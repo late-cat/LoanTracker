@@ -208,14 +208,14 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Credit Score</CardTitle>
             <Activity className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-xl sm:text-2xl font-bold">
               {address ? (isInitializing && creditScore === null ? <Loader2 className="w-5 h-5 animate-spin text-gray-400 mt-1" /> : (creditScore !== null ? creditScore : "---")) : "---"}
             </div>
             <p className="text-xs text-muted-foreground">On-chain live data</p>
@@ -227,7 +227,7 @@ export default function Dashboard() {
             <CreditCard className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-xl sm:text-2xl font-bold">
               {address ? (isInitializing && activeLoans === 0 ? <Loader2 className="w-5 h-5 animate-spin text-gray-400 mt-1" /> : activeLoans) : "0"}
             </div>
             <p className="text-xs text-muted-foreground">Currently borrowing</p>
@@ -239,7 +239,7 @@ export default function Dashboard() {
             <BadgeDollarSign className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-xl sm:text-2xl font-bold">
               {address ? (isInitializing && totalBorrowed === 0 ? <Loader2 className="w-5 h-5 animate-spin text-gray-400 mt-1" /> : `${totalBorrowed.toLocaleString()} XLM`) : "0 XLM"}
             </div>
             <p className="text-xs text-muted-foreground">Lifetime</p>
@@ -251,7 +251,7 @@ export default function Dashboard() {
             <TrendingUp className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-xl sm:text-2xl font-bold truncate">
               {address ? (isInitializing && walletBalance === "0.00" ? <Loader2 className="w-5 h-5 animate-spin text-gray-400 mt-1" /> : `${walletBalance} XLM`) : "0 XLM"}
             </div>
             <p className="text-xs text-muted-foreground">Available on Testnet</p>

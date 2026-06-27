@@ -29,9 +29,9 @@ export default function Home() {
   ];
 
   return (
-    <div className="flex flex-col gap-20 pb-20 font-sans mt-16 overflow-hidden">
+    <div className="flex flex-col gap-12 sm:gap-20 pb-20 font-sans mt-8 sm:mt-16 overflow-hidden">
       {/* Hero Section */}
-      <section className="relative pt-16 pb-8 text-center max-w-4xl mx-auto flex flex-col items-center px-4">
+      <section className="relative pt-8 sm:pt-16 pb-8 text-center max-w-4xl mx-auto flex flex-col items-center px-4">
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
