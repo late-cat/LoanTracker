@@ -176,6 +176,8 @@ This project is configured with a robust GitHub Actions workflow that automatica
 ### ✅ Test Output (3+ Passing Tests)
 
 **Smart Contract Tests (Cargo):**
+The Soroban smart contracts are heavily tested using Rust's built-in `cargo test` framework. The image below shows successful execution of our core test suites (`test_credit_rating` and `test_loan_lifecycle`), validating the on-chain state transitions.
+
 ```text
 running 2 tests
 test test::test_credit_rating ... ok
@@ -183,9 +185,12 @@ test test::test_loan_lifecycle ... ok
 
 test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
 ```
+> *Screenshot showing passing cargo tests on the Soroban contracts.*
 ![Cargo Test Output](demo-img/test.png)
 
 **Frontend Tests (Vitest & RTL):**
+Our React frontend is tested using Vitest and React Testing Library. The tests mock the Soroban API and ensure the UI renders correctly when a user's wallet is connected.
+
 ```text
  RUN  v4.1.9 /loan-tracker/frontend
 
@@ -195,8 +200,10 @@ test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
       Tests  1 passed (1)
    Duration  913ms
 ```
+> *Screenshot showing passing vitest execution on the Next.js frontend.*
 ![Vitest Output](demo-img/vitest-run.png)
 
+> *Screenshot showing our automated GitHub Actions workflow triggered successfully on push.*
 ![CI/CD Pipeline](demo-img/CI_CD.png)
 
 ---
