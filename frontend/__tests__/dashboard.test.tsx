@@ -10,7 +10,7 @@ vi.mock('@/store/wallet', () => ({
 
 vi.mock('@/lib/soroban', () => ({
   fetchCreditScore: vi.fn().mockResolvedValue(520),
-  fetchAllLoans: vi.fn().mockResolvedValue([]),
+  fetchUserLoans: vi.fn().mockResolvedValue([]),
   fetchWalletBalance: vi.fn().mockResolvedValue("100.00"),
   getRpcServer: vi.fn(),
   buildRequestLoanTx: vi.fn(),
