@@ -2,6 +2,8 @@
 
 A decentralized loan repayment tracker built on the Stellar network using Soroban smart contracts. This project is a complete "Orange Belt" Level 3 production-ready application.
 
+**🟢 Live Demo:** [https://loan-tracker-beige.vercel.app/](https://loan-tracker-beige.vercel.app/)
+
 ## 📸 Application Flow
 
 ![Dashboard Preview](demo-img/hero.png)
@@ -55,6 +57,11 @@ sequenceDiagram
 - **Wallet**: StellarWalletsKit (Multi-wallet support, Freighter, automatic network syncing).
 - **Smart Contracts**: Rust & Soroban SDK.
 - **Testing**: Vitest + React Testing Library for frontend, Cargo tests for contracts.
+
+## 🤖 Continuous Integration (CI/CD)
+This project is configured with a robust GitHub Actions workflow that automatically runs comprehensive tests for both the Smart Contracts (Cargo) and the Frontend (Vitest) on every push and pull request.
+
+![CI/CD Pipeline](demo-img/ci-cd.png)
 
 ## 🚀 Deployment Instructions
 
